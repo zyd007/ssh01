@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+<!-- 要用！的方法得把这个打开 -->
+ <!--  <constant name="struts.enable.DynamicMethodInvocation" value="true" /> -->
+ 			<!-- Message是基础名称(Message_zh或en.properties的) 这个是全局国际化-->
+ 			<constant name="struts.custom.i18n.resources" value="Message"></constant>
+ 			<!-- 自己加查询后缀 -->
+ 			<constant name="struts.action.extension" value="action,do,"/>
+ 			<!-- 开启动态方法XXX!XXX -->
+ 			<constant name="struts.enable.DynamicMethodInvocation" value="true"/>
+ 			<!-- 修改了xml文件不用重启 -->
+ 			<constant name="struts.configuration.xml.reload" value="true"/>
+ 			<!-- 改变上传文件大小范围 -->
+ 			<constant name="struts.multipart.maxSize" value="100000000"/>
+ 			<!-- 表示Action由Spring来进行创建，可以直接使用Spring依赖注入来注入 -->
+ 			<constant name="struts.objectFactory" value="spring" />
+ 			<!-- 因为继承了struts-default在struts-default.xml中默认使用了
+ 					defaultStack默认拦截器栈 -->
+    <package name="default" namespace="/" extends="struts-default">
+    	<interceptors>
+    		<interceptor name="authInterceptor" class="authInterceptor"/>
+    		<interceptor-stack name="auth">
+    			<interceptor-ref name="authInterceptor"/>
+    			<interceptor-ref name="defaultStack"/>
+    		</interceptor-stack>
+    	</interceptors>
+    	
+   <!-- 全局结果集 -->
+    <global-results>
+    	<result name="error">/WEB-INF/jsp/inc/error.jsp</result>
+    	<result name="exception">/WEB-INF/jsp/inc/exception.jsp</result>
+    	<result name="loginInput">/WEB-INF/jsp/loginInput.jsp</result>
+    </global-results>
+    <global-exception-mappings>
+    	<exception-mapping result="exception" exception="org.qhd.zy.ssh.exception.DepartmentException"/>
+    	<exception-mapping result="exception" exception="org.qhd.zy.ssh.exception.UserException"/>
+    </global-exception-mappings>
+    <action name="login" class="loginAction">
+    	<result type="redirect" name="redirect">${url}</result>
+    </action>
+ 	<!-- 此时等于用Spring来创建了userAction对象,在struts的配置文件中写action的class的时候
+	 * 就不能写类，而应该是userAction中对象 -->
+   <action name="*_*" class="{1}Action" method="{2}">
+    <!-- 默认name中为success -->
+    <result >/WEB-INF/jsp/{1}/{2}.jsp</result>
+    <!-- 验证得用这个,如果错了就用这个 -->
+    <result name="input">/WEB-INF/jsp/{1}/{2}Input.jsp</result>
+    <result type="redirect" name="redirect">${url}</result>
+    <interceptor-ref name="auth"/>
+    </action>
+    </package>
+</struts>
